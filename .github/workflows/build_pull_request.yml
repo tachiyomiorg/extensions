@@ -1,0 +1,31 @@
+name: PR build check
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '.github/workflows/issue_moderator.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build_individual:
+    name: Build individual modules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11
+          distribution: adopt
+
+      - name: Build extensions
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: assembleDebug
+          cache-read-only: true
